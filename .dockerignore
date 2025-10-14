@@ -1,0 +1,73 @@
+# # ───────────────────────────────
+# # 1. Python cache & compiled files
+# # ───────────────────────────────
+# __pycache__/
+# *.py[cod]
+# *$py.class
+
+# # ───────────────────────────────
+# # 2. Environment files & secrets
+# # ───────────────────────────────
+# # .env
+# # *.env
+
+# # ───────────────────────────────
+# # 3. Virtual environments
+# # ───────────────────────────────
+# env/
+# venv/
+# ENV/
+
+# # ───────────────────────────────
+# # 4. Logs
+# # ───────────────────────────────
+# *.log
+# *.out
+# *.pid
+
+# # ───────────────────────────────
+# # 5. OS & editor-specific files
+# # ───────────────────────────────
+# .DS_Store
+# Thumbs.db
+# .vscode/
+# .idea/
+# *.swp
+# *.swo
+
+# # ───────────────────────────────
+# # 6. Git-related files
+# # ───────────────────────────────
+# .git/
+# .gitignore
+
+# # ───────────────────────────────
+# # 7. Docker-related
+# # Prevent Dockerfile and ignore file from being copied (optional)
+# # ───────────────────────────────
+# Dockerfile
+# .dockerignore
+
+# # ───────────────────────────────
+# # 8. Django migration caches
+# # (Keep migration `.py` files but ignore compiled caches)
+# # ───────────────────────────────
+# **/migrations/__pycache__/
+# **/migrations/*.pyc
+
+# # ───────────────────────────────
+# # 9. Tests cache (if applicable)
+# # ───────────────────────────────
+# htmlcov/
+# .coverage
+# .tox/
+# .pytest_cache/
+
+# # ───────────────────────────────
+# # 10. Node frontend (if using React/Vite with DRF)
+# # ───────────────────────────────
+# node_modules/
+# npm-debug.log
+# yarn-error.log
+# dist/
+# build/

@@ -1,0 +1,28 @@
+version: '3.10'
+
+services: 
+  web:
+    build: .
+    container_name: samif6
+    command: uvicorn core.asgi:application --host 0.0.0.0 --port 8002 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    container_name: neon_db_samif6
+    environment:
+      POSTGRES_DB: core_db
+      POSTGRES_USER: core_user
+      POSTGRES_PASSWORD: core_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
