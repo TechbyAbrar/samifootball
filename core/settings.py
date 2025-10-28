@@ -237,7 +237,12 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Logging envuration
+import os
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
 
 LOGGING = {
     'version': 1,
@@ -260,8 +265,11 @@ LOGGING = {
             'formatter': 'simple',
         },
         'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/bugsfixing.log'),
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'bugsfixing.log'),
+            'when': 'D',                # Rotate daily
+            'interval': 1,              # Every 1 day
+            'backupCount': 7,           # Keep logs for 7 days
             'formatter': 'verbose',
         },
     },
@@ -277,7 +285,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        # Catch-all logger for all your project apps
         '': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
