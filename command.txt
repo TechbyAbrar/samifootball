@@ -1,0 +1,26 @@
+# backend_service
+sudo nano /etc/systemd/system/project_backend.service
+
+2️⃣ Reload systemd & start the service
+sudo systemctl daemon-reload
+sudo systemctl start project_backend
+sudo systemctl enable project_backend
+
+3️⃣ Check logs & status
+sudo systemctl status project_backend
+sudo journalctl -u project_backend -f
+
+
+# restart
+sudo systemctl restart project_backend
+
+======================================================
+NGINX
+======================================================
+
+sudo nano /etc/nginx/sites-available/project_backend
+
+Enable and restart Nginx:
+sudo ln -s /etc/nginx/sites-available/project_backend /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx

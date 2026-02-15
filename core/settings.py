@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 import dj_database_url
 import environ
+import logging
+from logging.handlers import TimedRotatingFileHandler
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -65,6 +67,7 @@ INSTALLED_APPS += EXTERNAL_APPS
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',       #whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -165,6 +168,9 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']  # Optional: for global static
 STATIC_ROOT = BASE_DIR / 'staticfiles'    # For collectstatic in production
 
+# WhiteNoise settings
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -236,60 +242,83 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
-# Logging envuration
-import os
-import logging
-from logging.handlers import TimedRotatingFileHandler
 
-LOG_DIR = os.path.join(BASE_DIR, 'logs')
-os.makedirs(LOG_DIR, exist_ok=True)
+
+# Logging Configuration
+
+# settings.py
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
+    "version": 1,
+    "disable_existing_loggers": False,
 
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {name} {message}',
-            'style': '{',
+    "formatters": {
+        "default": {
+            "format": "[{asctime}] [{levelname}] {message}",
+            "style": "{",
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+        "access": {
+            "format": "[{asctime}] {message}",
+            "style": "{",
         },
     },
 
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+    "handlers": {
+        "access_file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "level": "INFO",
+            "filename": LOG_DIR / "access.log",
+            "when": "D",          # rotate daily
+            "interval": 1,
+            "backupCount": 7,     # keep 7 days only
+            "formatter": "access",
+            "encoding": "utf-8",
         },
-        'file': {
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'bugsfixing.log'),
-            'when': 'D',                # Rotate daily
-            'interval': 1,              # Every 1 day
-            'backupCount': 7,           # Keep logs for 7 days
-            'formatter': 'verbose',
+        "error_file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "level": "ERROR",
+            "filename": LOG_DIR / "error.log",
+            "when": "D",          # rotate daily
+            "interval": 1,
+            "backupCount": 7,     # keep 7 days only
+            "formatter": "default",
+            "encoding": "utf-8",
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "default",
         },
     },
 
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'WARNING',
+    "loggers": {
+        "django.server": {
+            "handlers": ["access_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["error_file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "gunicorn.access": {
+            "handlers": ["access_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "gunicorn.error": {
+            "handlers": ["error_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        '': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+    "root": {
+        "handlers": ["error_file", "console"],
+        "level": "ERROR",
     },
 }
 
@@ -308,15 +337,15 @@ CANCEL_URL = 'http://localhost:3000/cancel/'    # Temporary
 
 
 # caching configurations
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': 'redis://127.0.0.1:6379/1',
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 
 # celery task configuration
